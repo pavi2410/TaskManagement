@@ -4,6 +4,9 @@
   "description": "",
   "license": "",
   "dependencies": {
+    "@mantine/core": "^3.6.9",
+    "@mantine/hooks": "^3.6.9",
+    "@mantine/ssr": "^3.6.9",
     "@remix-run/react": "^1.2.1",
     "@remix-run/vercel": "^1.2.1",
     "@supabase/supabase-js": "^1.30.4",
