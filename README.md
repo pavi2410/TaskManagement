@@ -1,6 +1,14 @@
-# TaskManagement
+# TaskMate - Task Management App
 
-DBMS project
+DBMS project.
+
+TaskMate is an app to organise your everyday stuff all in one place with simple and minimal UI.
+
+## Tech Stack
+- JavaScript
+- React
+- Remix
+- Supabase
 
 ## Team Members
 
