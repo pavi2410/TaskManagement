@@ -8,7 +8,7 @@ import {
 } from "remix";
 
 export function meta() {
-  return { title: "New Remix App" };
+  return { title: "TaskMate" };
 }
 
 export default function App() {
