@@ -8,12 +8,15 @@ let db;
 if (process.env.NODE_ENV === "production") {
   db = new PrismaClient();
   db.$connect();
+  console.log("Connected to production DB");
 } else {
   if (!global.__db) {
     global.__db = new PrismaClient();
     global.__db.$connect();
+    console.log("Reconnected to dev DB");
   }
   db = global.__db;
+  console.log("Connected to dev DB");
 }
 
 export { db };
