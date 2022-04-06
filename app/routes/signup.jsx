@@ -1,19 +1,9 @@
-import {
-  TextInput,
-  PasswordInput,
-  Checkbox,
-  Anchor,
-  Paper,
-  Title,
-  Text,
-  Container,
-  Group,
-  Button,
-} from '@mantine/core';
+import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Button } from '@mantine/core';
 import { useMemo } from 'react';
-import { Form, json, Link, useActionData, useSearchParams } from 'remix';
+import { Form, json, useActionData, useSearchParams } from 'remix';
 import { db } from '~/utils/db.server';
 import { createUserSession, register } from '~/utils/session.server';
+import { validateUsername, validatePassword } from '~/utils/validations.server'
 
 export default function () {
   const actionData = useActionData();
@@ -47,7 +37,7 @@ export default function () {
           <input
             type="hidden"
             name="redirectTo"
-            value={searchParams.get("redirectTo") ?? undefined}
+            value={searchParams.get("redirectTo") ?? "/tasks"}
           />
           <TextInput name="username" label="Email" placeholder="you@taskmate.com" required />
           <PasswordInput name="password" label="Password" placeholder="Your password" required mt="md" />
@@ -101,15 +91,3 @@ export const action = async ({ request }) => {
 }
 
 const badRequest = (data) => json(data, { status: 400 });
-
-function validateUsername(username) {
-  if (typeof username !== "string" || username.length < 3) {
-    return `Usernames must be at least 3 characters long`;
-  }
-}
-
-function validatePassword(password) {
-  if (typeof password !== "string" || password.length < 6) {
-    return `Passwords must be at least 6 characters long`;
-  }
-}
