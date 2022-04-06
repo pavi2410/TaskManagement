@@ -29,6 +29,6 @@ model Task {
   description String
   status      String
   priority    Int
-  User        User     @relation(fields: [userId], references: [id])
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
 }
