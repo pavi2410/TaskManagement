@@ -1,24 +1,47 @@
-import { AppShell, Autocomplete, Button, Group, Header, NumberInput, Paper, Stack, Text, TextInput } from "@mantine/core";
-import { Form, json, redirect, useLoaderData } from "remix";
+import { AppShell, Autocomplete, Button, Group, Header, NumberInput, Paper, Popover, Stack, Text, TextInput } from "@mantine/core";
+import { Form, Link, json, redirect, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import _ from "lodash";
+import { useState } from "react";
 
 export default function () {
   const loaderData = useLoaderData()
 
   const categories = _.groupBy(loaderData.userInfo.tasks, 'status')
+  // todo: sort categories ['Todo', 'InProgress', 'Done']
+  // todo: insert empty categories if not present
 
   return (
     <AppShell
       header={
-        <Header height={60} p="md">Taskmate</Header>
+        <Header height={60}>
+          <Group sx={{ height: '100%' }} px="sm" position="apart">
+            <Text>TaskMate</Text>
+            <AccountButton email={loaderData.userInfo.username} />
+          </Group>
+        </Header>
       }
     >
       {/* {JSON.stringify(categories, null, 2)} */}
       <Board categories={categories} />
     </AppShell>
   )
+}
+
+function AccountButton({ email }) {
+  const [opened, setOpened] = useState(false);
+  return (
+    <Popover
+      opened={opened}
+      onClose={() => setOpened(false)}
+      target={<Button variant="subtle" onClick={() => setOpened((o) => !o)}>{email}</Button>}
+      position="bottom"
+      withArrow
+    >
+      <Button component={Link} to="/logout">Logout</Button>
+    </Popover>
+  );
 }
 
 function Board({ categories }) {
@@ -50,7 +73,7 @@ function Column({ category, tasks }) {
 
 function Task({ task }) {
   return (
-    <div>
+    <Paper shadow="xs" radius="md" p="md">
       <Text>{task.name}</Text>
       <Text>{task.description}</Text>
       <Form method="DELETE">
@@ -60,7 +83,7 @@ function Task({ task }) {
           Delete
         </Button>
       </Form>
-    </div>
+    </Paper>
   )
 }
 
