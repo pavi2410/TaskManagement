@@ -1,28 +1,41 @@
-import { Autocomplete, Button, NumberInput, Text, TextInput } from "@mantine/core";
-import { Form, json, Link, useCatch, useLoaderData } from "remix";
+import { AppShell, Autocomplete, Button, Group, Header, NumberInput, Paper, Stack, Text, TextInput } from "@mantine/core";
+import { Form, json, redirect, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
+import _ from "lodash";
 
 export default function () {
   const loaderData = useLoaderData()
+
+  const categories = _.groupBy(loaderData.userInfo.tasks, 'status')
+
   return (
-    <div>
-      <div>
-        {loaderData.userInfo.tasks?.map(task => (
-          <div>
-            <Text>{task.name}</Text>
-            <Text>{task.description}</Text>
-            <Text>{task.status}</Text>
-            <Text>{task.priority}</Text>
-            <Form method="DELETE">
-              <input type="hidden" name="_method" value="delete" />
-              <input type="hidden" name="task_id" value={task.id} />
-              <Button type="submit" variant="filled" color="red" compact>
-                Delete
-              </Button>
-            </Form>
-          </div>
-        ))}
+    <AppShell
+      header={
+        <Header height={60} p="md">Taskmate</Header>
+      }
+    >
+      {/* {JSON.stringify(categories, null, 2)} */}
+      <Board categories={categories} />
+    </AppShell>
+  )
+}
+
+function Board({ categories }) {
+  return (
+    <Group>
+      {_.map(categories, (tasks, category) => <Column category={category} tasks={tasks} key={category} />)}
+    </Group>
+  )
+}
+
+function Column({ category, tasks }) {
+  const sortedTasks = _.sortBy(tasks, 'priority');
+  return (
+    <Paper shadow="xs" radius="md" p="md">
+      <Stack>
+        <Text>{category}</Text>
+        {sortedTasks.map(task => <Task task={task} key={task.id} />)}
         <Form method="POST">
           <TextInput name="name" placeholder="name" />
           <TextInput name="description" placeholder="description" />
@@ -30,8 +43,23 @@ export default function () {
           <NumberInput name="priority" placeholder="priority" />
           <Button type="submit">Add new task</Button>
         </Form>
-      </div>
-      <pre>{JSON.stringify(loaderData, null, 2)}</pre>
+      </Stack>
+    </Paper>
+  )
+}
+
+function Task({ task }) {
+  return (
+    <div>
+      <Text>{task.name}</Text>
+      <Text>{task.description}</Text>
+      <Form method="DELETE">
+        <input type="hidden" name="_method" value="delete" />
+        <input type="hidden" name="task_id" value={task.id} />
+        <Button type="submit" variant="filled" color="red" compact>
+          Delete
+        </Button>
+      </Form>
     </div>
   )
 }
@@ -39,7 +67,7 @@ export default function () {
 export const loader = async ({ request }) => {
   const userId = await getUserId(request);
   if (!userId) {
-    throw new Response("Unauthorized", { status: 401 });
+    return redirect("/login?redirectTo=/tasks")
   }
   const userInfo = await db.user.findUnique({
     where: { id: userId },
@@ -76,19 +104,4 @@ export const action = async ({ request }) => {
     })
     return json({});
   }
-}
-
-export function CatchBoundary() {
-  const caught = useCatch();
-
-  if (caught.status === 401) {
-    return (
-      <div className="error-container">
-        <p>You must be logged in to access this app.</p>
-        <Link to="/login?redirectTo=/tasks">Login</Link>
-      </div>
-    );
-  }
-
-  throw new Error(`Unexpected caught response with status: ${caught.status}`);
 }
