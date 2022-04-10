@@ -2,22 +2,22 @@ import bcrypt from "bcryptjs";
 import { createCookieSessionStorage, redirect } from "remix";
 import { db } from "./db.server";
 
-export async function register({ username, password }) {
+export async function register({ email, password, name }) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await db.user.create({
-    data: { username, passwordHash },
+    data: { email, passwordHash, name },
   });
-  return { id: user.id, username };
+  return { id: user.id, email };
 }
 
-export async function login({ username, password }) {
+export async function login({ email, password }) {
   const user = await db.user.findUnique({
-    where: { username },
+    where: { email },
   });
   if (!user) return null;
   const isCorrectPassword = await bcrypt.compare(password, user.passwordHash);
   if (!isCorrectPassword) return null;
-  return { id: user.id, username };
+  return { id: user.id, email };
 }
 
 const sessionSecret = process.env.SESSION_SECRET;
@@ -72,7 +72,7 @@ export async function getUser(request) {
   try {
     const user = await db.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true },
+      select: { id: true, email: true },
     });
     return user;
   } catch {

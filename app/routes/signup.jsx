@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Form, json, useActionData, useSearchParams } from 'remix';
 import { db } from '~/utils/db.server';
 import { createUserSession, register } from '~/utils/session.server';
-import { validateUsername, validatePassword } from '~/utils/validations.server'
+import { validateEmail, validatePassword } from '~/utils/validations.server'
 
 export default function () {
   const actionData = useActionData();
@@ -31,16 +31,18 @@ export default function () {
         </Anchor>
       </Text>
 
-      <Paper withBorder shadow="md" padding={30} mt={30} radius="md">
-        {actionData && JSON.stringify(actionData)}
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        {/* {actionData && JSON.stringify(actionData)} */}
+        {actionData?.formError && <Text color="red">{actionData.formError}</Text>}
         <Form method="POST">
           <input
             type="hidden"
             name="redirectTo"
             value={searchParams.get("redirectTo") ?? "/tasks"}
           />
-          <TextInput name="username" label="Email" placeholder="you@taskmate.com" required />
-          <PasswordInput name="password" label="Password" placeholder="Your password" required mt="md" />
+          <TextInput name="name" label="Name" placeholder="Your name" required />
+          <TextInput name="email" label="Email" placeholder="you@taskmate.com" required error={actionData?.fieldErrors.email.details[0].message} />
+          <PasswordInput name="password" label="Password" placeholder="Your password" required mt="md" error={actionData?.fieldErrors.password.details[0].message} />
           <Button fullWidth mt="xl" type="submit">
             Create account
           </Button>
@@ -52,38 +54,36 @@ export default function () {
 
 export const action = async ({ request }) => {
   const form = await request.formData();
-  console.log(form)
-  const username = form.get("username");
+  const name = form.get("name");
+  const email = form.get("email");
   const password = form.get("password");
   const redirectTo = form.get("redirectTo") || "/tasks";
   if (
-    typeof username !== "string" ||
+    typeof name !== "string" ||
+    typeof email !== "string" ||
     typeof password !== "string" ||
     typeof redirectTo !== "string"
   ) {
     return badRequest({ formError: `Form not submitted correctly.` });
   }
 
-  const fields = { username, password };
   const fieldErrors = {
-    username: validateUsername(username),
+    email: validateEmail(email),
     password: validatePassword(password),
   };
   if (Object.values(fieldErrors).some(Boolean)) {
-    return badRequest({ fieldErrors, fields });
+    return badRequest({ fieldErrors });
   }
 
-  const userExists = await db.user.findFirst({ where: { username } });
+  const userExists = await db.user.findFirst({ where: { email } });
   if (userExists) {
     return badRequest({
-      fields,
-      formError: `User with username ${username} already exists`,
+      formError: `User with email ${email} already exists`,
     });
   }
-  const user = await register({ username, password });
+  const user = await register({ email, password, name });
   if (!user) {
     return badRequest({
-      fields,
       formError: `Something went wrong trying to create a new user.`,
     });
   }

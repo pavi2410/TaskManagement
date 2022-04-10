@@ -1,7 +1,8 @@
 import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Button } from '@mantine/core';
 import { useMemo } from 'react';
 import { Form, json, useActionData, useSearchParams } from 'remix';
-import { validateUsername, validatePassword } from '~/utils/validations.server'
+import { createUserSession, login } from '~/utils/session.server';
+import { validateEmail, validatePassword } from '~/utils/validations.server'
 
 export default function () {
   const actionData = useActionData();
@@ -29,16 +30,17 @@ export default function () {
         </Anchor>
       </Text>
 
-      <Paper withBorder shadow="md" padding={30} mt={30} radius="md">
-        {actionData && JSON.stringify(actionData)}
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        {/* {actionData && JSON.stringify(actionData, null, 2)} */}
+        {actionData?.formError && <Text color="red">{actionData.formError}</Text>}
         <Form method="POST">
           <input
             type="hidden"
             name="redirectTo"
             value={searchParams.get("redirectTo") ?? "/tasks"}
           />
-          <TextInput label="Email" placeholder="you@taskmate.com" required />
-          <PasswordInput label="Password" placeholder="Your password" required mt="md" />
+          <TextInput name="email" type="email" label="Email" placeholder="you@taskmate.com" required error={actionData?.fieldErrors?.email.details[0].message} />
+          <PasswordInput name="password" label="Password" placeholder="Your password" required mt="md" error={actionData?.fieldErrors?.password.details[0].message} />
           <Button fullWidth mt="xl" type="submit">
             Sign in
           </Button>
@@ -50,31 +52,29 @@ export default function () {
 
 export const action = async ({ request }) => {
   const form = await request.formData();
-  const username = form.get("username");
+  const email = form.get("email");
   const password = form.get("password");
   const redirectTo = form.get("redirectTo") || "/tasks";
   if (
-    typeof username !== "string" ||
+    typeof email !== "string" ||
     typeof password !== "string" ||
     typeof redirectTo !== "string"
   ) {
     return badRequest({ formError: `Form not submitted correctly.` });
   }
 
-  const fields = { username, password };
   const fieldErrors = {
-    username: validateUsername(username),
+    email: validateEmail(email),
     password: validatePassword(password),
   };
   if (Object.values(fieldErrors).some(Boolean)) {
-    return badRequest({ fieldErrors, fields });
+    return badRequest({ fieldErrors });
   }
 
-  const user = await login({ username, password });
+  const user = await login({ email, password });
   if (!user) {
     return badRequest({
-      fields,
-      formError: `Username/Password combination is incorrect`,
+      formError: `Email/Password combination is incorrect`,
     });
   }
   return createUserSession(user.id, redirectTo);
