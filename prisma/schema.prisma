@@ -16,8 +16,9 @@ model User {
   id           String   @id @default(uuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  username     String   @unique
+  email        String   @unique
   passwordHash String
+  name         String
   tasks        Task[]
 }
 
@@ -25,10 +26,9 @@ model Task {
   id          String   @id @default(uuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  name        String
   description String
-  status      String
-  priority    Int
+  category    String
+  deadline    DateTime
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
 }
