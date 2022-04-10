@@ -27,9 +27,6 @@
     "cross-env": "^7.0.3",
     "prisma": "^3.10.0"
   },
-  "engines": {
-    "node": ">=14"
-  },
   "sideEffects": false,
   "scripts": {
     "postinstall": "remix setup node && npm run prisma:generate",
