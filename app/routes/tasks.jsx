@@ -1,27 +1,42 @@
-import { AppShell, Autocomplete, Button, Group, Header, NumberInput, Paper, Popover, Stack, Text, TextInput } from "@mantine/core";
-import { Form, Link, json, redirect, useLoaderData } from "remix";
+import { AppShell, Button, Group, Header, Modal, Paper, Popover, Select, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
+import { DatePicker } from '@mantine/dates';
+import { Form, json, redirect, useLoaderData } from "remix";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import _ from "lodash";
 import { useState } from "react";
 
-export default function () {
-  const loaderData = useLoaderData()
+const CATEGORIES = { 'ToDo': [], 'InProgress': [], 'Done': [], 'Backlog': [] }
 
-  const categories = _.groupBy(loaderData.userInfo.tasks, 'status')
-  // todo: sort categories ['Todo', 'InProgress', 'Done']
-  // todo: insert empty categories if not present
+export default function () {
+  const { userInfo: { tasks, ...user } } = useLoaderData()
+
+  const categories = _.defaults(_.groupBy(tasks, 'category'), CATEGORIES)
+  const todoItems = _.partition(categories.ToDo, (task) => new Date(task.deadline) >= Date.now())
+  categories.ToDo = todoItems[0]
+  categories.Backlog = todoItems[1]
 
   return (
     <AppShell
       header={
-        <Header height={60}>
-          <Group sx={{ height: '100%' }} px="sm" position="apart">
-            <Text>TaskMate</Text>
-            <AccountButton email={loaderData.userInfo.username} />
+        <Header height={60} py="xs" px="xl">
+          <Group sx={{ height: '100%' }} position="apart">
+            <Text
+              component="span"
+              align="center"
+              variant="gradient"
+              gradient={{ from: 'indigo', to: 'pink', deg: 45 }}
+              size="xl"
+              weight={700}
+            >
+              TaskMate
+            </Text>
+            <AccountButton user={user} />
           </Group>
         </Header>
       }
+      fixed
+      sx={theme => ({ main: { background: theme.colors.gray[0] } })}
     >
       {/* {JSON.stringify(categories, null, 2)} */}
       <Board categories={categories} />
@@ -29,61 +44,112 @@ export default function () {
   )
 }
 
-function AccountButton({ email }) {
+function AccountButton({ user }) {
   const [opened, setOpened] = useState(false);
   return (
     <Popover
       opened={opened}
       onClose={() => setOpened(false)}
-      target={<Button variant="subtle" onClick={() => setOpened((o) => !o)}>{email}</Button>}
+      target={<Button variant="subtle" onClick={() => setOpened((o) => !o)}>Hi {user.name}!</Button>}
       position="bottom"
       withArrow
     >
-      <Button component={Link} to="/logout">Logout</Button>
+      <Stack>
+        <Text>{user.email}</Text>
+        <Form action="/logout" method="POST">
+          <Button type="submit">Logout</Button>
+        </Form>
+      </Stack>
     </Popover>
   );
 }
 
 function Board({ categories }) {
   return (
-    <Group>
-      {_.map(categories, (tasks, category) => <Column category={category} tasks={tasks} key={category} />)}
+    <Group align="start">
+      {_.map(_.keys(CATEGORIES), (category) => <Column category={category} tasks={categories[category]} key={category} />)}
     </Group>
   )
 }
 
 function Column({ category, tasks }) {
+  const [opened, setOpened] = useState(false);
   const sortedTasks = _.sortBy(tasks, 'priority');
   return (
-    <Paper shadow="xs" radius="md" p="md">
+    <Paper shadow="xs" radius="md" p="md" sx={{ minWidth: 350 }}>
       <Stack>
-        <Text>{category}</Text>
+        <Title order={3}>{category}</Title>
         {sortedTasks.map(task => <Task task={task} key={task.id} />)}
-        <Form method="POST">
-          <TextInput name="name" placeholder="name" />
-          <TextInput name="description" placeholder="description" />
-          <Autocomplete name="status" placeholder="status" data={['Todo', 'InProgress', 'Done']} />
-          <NumberInput name="priority" placeholder="priority" />
-          <Button type="submit">Add new task</Button>
-        </Form>
+        {sortedTasks.length == 0 && <Text>No tasks!</Text>}
+        <Button variant="outline" onClick={() => setOpened(true)}>New Task</Button>
+        <NewTaskModal category={category} opened={opened} setOpened={setOpened} />
       </Stack>
     </Paper>
   )
 }
 
-function Task({ task }) {
+function NewTaskModal({ opened, setOpened, category }) {
   return (
-    <Paper shadow="xs" radius="md" p="md">
-      <Text>{task.name}</Text>
-      <Text>{task.description}</Text>
-      <Form method="DELETE">
-        <input type="hidden" name="_method" value="delete" />
-        <input type="hidden" name="task_id" value={task.id} />
-        <Button type="submit" variant="filled" color="red" compact>
-          Delete
-        </Button>
+    <Modal
+      opened={opened}
+      onClose={() => setOpened(false)}
+      title={<Title>Create new Task in {category}</Title>}
+    >
+      <Form method="POST">
+        <Stack>
+          <Textarea name="description" label="Description" required />
+          <input type="hidden" name="category" value={category} />
+          <DatePicker name="deadline" placeholder="Pick date" label="Deadline" required />
+          <Button type="submit">Add task</Button>
+        </Stack>
       </Form>
+    </Modal>
+  )
+}
+
+function Task({ task }) {
+  const [opened, setOpened] = useState(false);
+  return (
+    <Paper shadow="0" radius="md" p="md" withBorder onClick={() => setOpened(true)}>
+      <Text size="lg">{task.description}</Text>
+      <Text color="dimmed">Due {new Date(task.deadline).toLocaleDateString('en-IN')}</Text>
+      <EditTaskModal task={task} opened={opened} setOpened={setOpened} />
     </Paper>
+  )
+}
+
+function EditTaskModal({ opened, setOpened, task }) {
+  const [description, setDescription] = useState(task.description);
+  const [category, setCategory] = useState(task.category);
+  const [deadline, setDeadline] = useState(new Date(task.deadline));
+  return (
+    <Modal
+      opened={opened}
+      onClose={() => setOpened(false)}
+      title={<Title>Edit Task</Title >}
+    >
+      <Stack>
+        <Textarea form="update_form" name="description" label="Description" value={description} onChange={(e) => setDescription(e.currentTarget.value)} />
+        {/* Fix for bug mantine#1137 */}
+        <input type="hidden" form="update_form" name="category" value={category} />
+        <Select label="Category" data={_.keys(CATEGORIES)} value={category} onChange={setCategory} />
+        <DatePicker form="update_form" name="deadline" placeholder="Pick date" label="Deadline" value={deadline} onChange={setDeadline} />
+        <Group position="right">
+          <Form method="PATCH" id="update_form">
+            <input type="hidden" name="task_id" value={task.id} />
+            <Button type="submit" variant="subtle" color="green">
+              Update
+            </Button>
+          </Form>
+          <Form method="DELETE">
+            <input type="hidden" name="task_id" value={task.id} />
+            <Button type="submit" variant="subtle" color="red">
+              Delete
+            </Button>
+          </Form>
+        </Group>
+      </Stack>
+    </Modal>
   )
 }
 
@@ -108,12 +174,12 @@ export const action = async ({ request }) => {
     throw new Response("Unauthorized", { status: 401 });
   }
   if (request.method === 'POST') {
+    const description = form.get('description');
+    const category = form.get('category');
+    const deadline = new Date(form.get('deadline'));
     const task = await db.task.create({
       data: {
-        name: form.get("name"),
-        description: form.get("description"),
-        status: form.get("status"),
-        priority: parseInt(form.get("priority")),
+        description, category, deadline,
         User: {
           connect: { id: userId }
         },
@@ -123,6 +189,18 @@ export const action = async ({ request }) => {
   } else if (request.method === 'DELETE') {
     const taskId = form.get("task_id");
     const task = await db.task.delete({
+      where: { id: taskId },
+    })
+    return json({});
+  } else if (request.method === 'PATCH') {
+    const taskId = form.get("task_id");
+    const description = form.get('description');
+    const category = form.get('category');
+    const deadline = new Date(form.get('deadline'));
+    const task = await db.task.update({
+      data: {
+        description, category, deadline
+      },
       where: { id: taskId },
     })
     return json({});
