@@ -7,14 +7,15 @@ import _ from "lodash";
 import { useState } from "react";
 
 const CATEGORIES = { 'ToDo': [], 'InProgress': [], 'Done': [], 'Backlog': [] }
+const isBacklog = (task) => new Date(task.deadline) < Date.now()
 
 export default function () {
   const { userInfo: { tasks, ...user } } = useLoaderData()
 
   const categories = _.defaults(_.groupBy(tasks, 'category'), CATEGORIES)
-  const todoItems = _.partition(categories.ToDo, (task) => new Date(task.deadline) >= Date.now())
-  categories.ToDo = todoItems[0]
-  categories.Backlog = todoItems[1]
+  const todoItems = _.partition(categories.ToDo, isBacklog)
+  categories.Backlog = todoItems[0]
+  categories.ToDo = todoItems[1]
 
   return (
     <AppShell
@@ -50,7 +51,7 @@ function AccountButton({ user }) {
     <Popover
       opened={opened}
       onClose={() => setOpened(false)}
-      target={<Button variant="subtle" onClick={() => setOpened((o) => !o)}>Hi {user.name}!</Button>}
+      target={<Button variant="subtle" onClick={() => setOpened((o) => !o)}>Hi {user.name}! 👋</Button>}
       position="bottom"
       withArrow
     >
@@ -74,11 +75,17 @@ function Board({ categories }) {
 
 function Column({ category, tasks }) {
   const [opened, setOpened] = useState(false);
-  const sortedTasks = _.sortBy(tasks, 'priority');
+  const sortedTasks = _.orderBy(tasks, (task) => new Date(task.deadline), ['desc']);
+  const icon = {
+    ToDo: '🚧',
+    InProgress: '⚒️',
+    Done: '🚀',
+    Backlog: '🚨'
+  }
   return (
     <Paper shadow="xs" radius="md" p="md" sx={{ minWidth: 350 }}>
       <Stack>
-        <Title order={3}>{category}</Title>
+        <Title order={3}>{icon[category]} {category}</Title>
         {sortedTasks.map(task => <Task task={task} key={task.id} />)}
         {sortedTasks.length == 0 && <Text>No tasks!</Text>}
         <Button variant="outline" onClick={() => setOpened(true)}>New Task</Button>
@@ -109,8 +116,15 @@ function NewTaskModal({ opened, setOpened, category }) {
 
 function Task({ task }) {
   const [opened, setOpened] = useState(false);
+  const colors = (theme) => ({
+    background: ({
+      ToDo: isBacklog(task) ? theme.colors.red[0] : theme.colors.yellow[0],
+      InProgress: theme.colors.blue[0],
+      Done: theme.colors.green[0]
+    })[task.category]
+  })
   return (
-    <Paper shadow="0" radius="md" p="md" withBorder onClick={() => setOpened(true)}>
+    <Paper sx={colors} shadow="0" radius="md" p="md" onClick={() => setOpened(true)}>
       <Text size="lg">{task.description}</Text>
       <Text color="dimmed">Due {new Date(task.deadline).toLocaleDateString('en-IN')}</Text>
       <EditTaskModal task={task} opened={opened} setOpened={setOpened} />
@@ -135,16 +149,16 @@ function EditTaskModal({ opened, setOpened, task }) {
         <Select label="Category" data={_.keys(CATEGORIES)} value={category} onChange={setCategory} />
         <DatePicker form="update_form" name="deadline" placeholder="Pick date" label="Deadline" value={deadline} onChange={setDeadline} />
         <Group position="right">
-          <Form method="PATCH" id="update_form">
-            <input type="hidden" name="task_id" value={task.id} />
-            <Button type="submit" variant="subtle" color="green">
-              Update
-            </Button>
-          </Form>
           <Form method="DELETE">
             <input type="hidden" name="task_id" value={task.id} />
             <Button type="submit" variant="subtle" color="red">
               Delete
+            </Button>
+          </Form>
+          <Form method="PATCH" id="update_form">
+            <input type="hidden" name="task_id" value={task.id} />
+            <Button type="submit" variant="subtle" color="green">
+              Update
             </Button>
           </Form>
         </Group>
