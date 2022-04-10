@@ -1,9 +1,10 @@
 lockfileVersion: 5.3
 
 specifiers:
-  '@mantine/core': ^4.1.2
-  '@mantine/hooks': ^4.1.2
-  '@mantine/ssr': ^4.1.2
+  '@mantine/core': ^4.1.3
+  '@mantine/dates': ^4.1.3
+  '@mantine/hooks': ^4.1.3
+  '@mantine/ssr': ^4.1.3
   '@prisma/client': ^3.10.0
   '@remix-run/dev': ^1.2.1
   '@remix-run/react': ^1.2.1
@@ -12,6 +13,7 @@ specifiers:
   '@supabase/supabase-js': ^1.30.4
   bcryptjs: ^2.4.3
   cross-env: ^7.0.3
+  dayjs: ^1.11.0
   dotenv: ^16.0.0
   joi: ^17.6.0
   lodash: ^4.17.21
@@ -21,14 +23,16 @@ specifiers:
   remix: ^1.2.1
 
 dependencies:
-  '@mantine/core': 4.1.2_4e790e7eec2e9921ebde7f7d82c5989b
-  '@mantine/hooks': 4.1.2_react@17.0.2
-  '@mantine/ssr': 4.1.2_react-dom@17.0.2+react@17.0.2
+  '@mantine/core': 4.1.3_31ca2d5b65baf04e69a917277e5e7ab4
+  '@mantine/dates': 4.1.3_eb43b5d2ca0eaf6635e79328bb7373ee
+  '@mantine/hooks': 4.1.3_react@17.0.2
+  '@mantine/ssr': 4.1.3_react-dom@17.0.2+react@17.0.2
   '@prisma/client': 3.12.0_prisma@3.12.0
   '@remix-run/react': 1.3.4_react-dom@17.0.2+react@17.0.2
   '@remix-run/vercel': 1.3.4_react-dom@17.0.2+react@17.0.2
   '@supabase/supabase-js': 1.33.3
   bcryptjs: 2.4.3
+  dayjs: 1.11.0
   dotenv: 16.0.0
   joi: 17.6.0
   lodash: 4.17.21
@@ -499,15 +503,15 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.11
     dev: true
 
-  /@mantine/core/4.1.2_4e790e7eec2e9921ebde7f7d82c5989b:
-    resolution: {integrity: sha512-7P3dhcTkA6zod7L9kSlIpEr4IcHX31LqFetbmoD/q8TqxBVBS2ckNYTwQaH5o446j2ORKrPZ0r28xBCI+lib8Q==}
+  /@mantine/core/4.1.3_31ca2d5b65baf04e69a917277e5e7ab4:
+    resolution: {integrity: sha512-uIJNWUdoT8dpFBYXDbllv3d2GRgWftFZ3rIV22dN3o1XnJZ44a4woX7aWO8vDmv0H62CTZDyz02jWriLFMmfLQ==}
     peerDependencies:
-      '@mantine/hooks': 4.1.2
+      '@mantine/hooks': 4.1.3
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@mantine/hooks': 4.1.2_react@17.0.2
-      '@mantine/styles': 4.1.2_react-dom@17.0.2+react@17.0.2
+      '@mantine/hooks': 4.1.3_react@17.0.2
+      '@mantine/styles': 4.1.3_react-dom@17.0.2+react@17.0.2
       '@popperjs/core': 2.11.5
       '@radix-ui/react-scroll-area': 0.1.4_react@17.0.2
       react: 17.0.2
@@ -519,16 +523,30 @@ packages:
       - '@types/react'
     dev: false
 
-  /@mantine/hooks/4.1.2_react@17.0.2:
-    resolution: {integrity: sha512-ccTD4q7jViYisizjydRkCZdiMrtbC+uxEsZHHjyy/adcK8zOix178bag53OKn5TIFFMH6dXHZmto0IZsVCY1vw==}
+  /@mantine/dates/4.1.3_eb43b5d2ca0eaf6635e79328bb7373ee:
+    resolution: {integrity: sha512-kOda6xlCdo0DPKuGJa8/27BzSdgdq1JsqVD54CmZ3Af+b7piZpDXoaiLO1B9sD+r7/ZdR7V0G2VVpzUcc8Zobg==}
+    peerDependencies:
+      '@mantine/core': 4.1.3
+      '@mantine/hooks': 4.1.3
+      dayjs: ^1.10.5
+      react: '>=16.8.0'
+    dependencies:
+      '@mantine/core': 4.1.3_31ca2d5b65baf04e69a917277e5e7ab4
+      '@mantine/hooks': 4.1.3_react@17.0.2
+      dayjs: 1.11.0
+      react: 17.0.2
+    dev: false
+
+  /@mantine/hooks/4.1.3_react@17.0.2:
+    resolution: {integrity: sha512-sFDdpg8TjopSqFICNEX4OYUAbarAVn35FkRfE6vk4u2ecf8ySHO12XbBn/1zybTOD1dUACT8GJ0KI0WsYgT7Uw==}
     peerDependencies:
       react: '>=16.8.0'
     dependencies:
       react: 17.0.2
     dev: false
 
-  /@mantine/ssr/4.1.2_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-bH2EAnKlZhrlxCn+W1lNfPBWbJJFCii5XgpLhOk7Fe8imlF6VL9dwHd1uMfBo/dl5tBgBH+AiFZ+BuTyfrpfxw==}
+  /@mantine/ssr/4.1.3_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-EuIK+ZYuo/CBZSIQ40pktfx8DxvLNP5wqro7HsNssl/0eJkyRwwm4oBj2yCdQ8YyRM0CQ8Ngc0+UbInlVQyJrA==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -538,7 +556,7 @@ packages:
       '@emotion/serialize': 1.0.2
       '@emotion/server': 11.4.0
       '@emotion/utils': 1.1.0
-      '@mantine/styles': 4.1.2_react-dom@17.0.2+react@17.0.2
+      '@mantine/styles': 4.1.3_react-dom@17.0.2+react@17.0.2
       csstype: 3.0.11
       html-react-parser: 1.4.10_react@17.0.2
       react: 17.0.2
@@ -549,8 +567,8 @@ packages:
       - '@types/react'
     dev: false
 
-  /@mantine/styles/4.1.2_react-dom@17.0.2+react@17.0.2:
-    resolution: {integrity: sha512-HcBrmKzEV7jbBBxicnHUl/Ol/eS5hrZ4lt4hpoi/yD/VVx0BHolK4LkiHCvoh9vFHHN2o9gQo236LgHbqYMEGA==}
+  /@mantine/styles/4.1.3_react-dom@17.0.2+react@17.0.2:
+    resolution: {integrity: sha512-wkyfwPlLs4QWa5q3FfpqS0xGbAvnPEapKhfRKSQta3EqpwejolfwlhZMyJCOoah0RiVp4eWjucWSBApwvDZjxQ==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -1700,6 +1718,10 @@ packages:
     dependencies:
       es5-ext: 0.10.59
       type: 1.2.0
+    dev: false
+
+  /dayjs/1.11.0:
+    resolution: {integrity: sha512-JLC809s6Y948/FuCZPm5IX8rRhQwOiyMb2TfVVQEixG7P8Lm/gt5S7yoQZmC8x1UehI9Pb7sksEt4xx14m+7Ug==}
     dev: false
 
   /deasync/0.1.26:
