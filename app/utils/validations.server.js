@@ -1,12 +1,12 @@
 import Joi from 'joi'
 
 const validationSchema = {
-  username: Joi.string().required().email({ tlds: { allow: false } }),
-  password: Joi.string().required().min(6),
+  email: Joi.string().required().email({ tlds: { allow: false } }),
+  password: Joi.string().required().min(8).alphanum(),
 }
 
-export function validateUsername(username) {
-  const { error } = validationSchema.username.validate(username);
+export function validateEmail(email) {
+  const { error } = validationSchema.email.validate(email);
   if (error) {
     return error
   }
