@@ -8,7 +8,7 @@ import _ from "lodash";
 import { useState } from "react";
 
 const CATEGORIES = { 'ToDo': [], 'InProgress': [], 'Done': [], 'Backlog': [] }
-const isBacklog = (task) => new Date(task.deadline) < Date.now()
+const isBacklog = (task) => new Date(task.deadline) < new Date()
 
 export default function () {
   const { userInfo: { tasks, ...user } } = useLoaderData()
