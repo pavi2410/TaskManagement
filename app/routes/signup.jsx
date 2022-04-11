@@ -1,6 +1,7 @@
 import { TextInput, PasswordInput, Anchor, Paper, Title, Text, Container, Button } from '@mantine/core';
 import { useMemo } from 'react';
-import { Form, json, useActionData, useSearchParams } from 'remix';
+import { json } from '@remix-run/node';
+import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { db } from '~/utils/db.server';
 import { createUserSession, register } from '~/utils/session.server';
 import { validateEmail, validatePassword } from '~/utils/validations.server'

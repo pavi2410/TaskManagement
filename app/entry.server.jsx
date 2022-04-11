@@ -1,5 +1,5 @@
 import { renderToString } from "react-dom/server";
-import { RemixServer } from "remix";
+import { RemixServer } from "@remix-run/react";
 import { injectStylesIntoStaticMarkup } from "@mantine/ssr";
 import  "dotenv/config"
 

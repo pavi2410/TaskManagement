@@ -6,7 +6,7 @@ import {
   Button,
   Group
 } from '@mantine/core';
-import { Link } from 'remix';
+import { Link } from '@remix-run/react';
 import image from '../assets/undraw_taking_notes.svg';
 
 const useStyles = createStyles((theme) => ({

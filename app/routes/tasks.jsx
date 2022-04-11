@@ -1,6 +1,7 @@
 import { AppShell, Button, Group, Header, Modal, Paper, Popover, Select, Stack, Text, Textarea, TextInput, Title } from "@mantine/core";
 import { DatePicker } from '@mantine/dates';
-import { Form, json, redirect, useLoaderData } from "remix";
+import { json, redirect } from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { getUserId } from "~/utils/session.server";
 import _ from "lodash";
