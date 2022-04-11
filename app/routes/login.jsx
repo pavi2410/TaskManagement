@@ -40,8 +40,8 @@ export default function () {
             name="redirectTo"
             value={searchParams.get("redirectTo") ?? "/tasks"}
           />
-          <TextInput name="email" type="email" label="Email" placeholder="you@taskmate.com" required error={actionData?.fieldErrors?.email.details[0].message} />
-          <PasswordInput name="password" label="Password" placeholder="Your password" required mt="md" error={actionData?.fieldErrors?.password.details[0].message} />
+          <TextInput name="email" type="email" label="Email" placeholder="you@taskmate.com" required error={actionData?.fieldErrors?.email?.details[0].message} />
+          <PasswordInput name="password" label="Password" placeholder="Your password" required mt="md" error={actionData?.fieldErrors?.password?.details[0].message} />
           <Button fullWidth mt="xl" type="submit">
             Sign in
           </Button>
