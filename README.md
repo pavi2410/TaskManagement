@@ -4,6 +4,8 @@ DBMS project.
 
 TaskMate is an app to organise your everyday stuff all in one place with simple and minimal UI.
 
+![image](https://user-images.githubusercontent.com/28837746/165362148-f9a7ec89-8537-4f8a-9c90-dc8d358d6e09.png)
+
 ## Tech Stack
 - JavaScript
 - React
